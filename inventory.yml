@@ -1,0 +1,9 @@
+all:
+  hosts:
+    192.168.0.[2:10]
+  vars:
+    ansible_connection: ssh
+    ansible_user: pi
+    ansible_ssh_pass: raspberry
+    ansible_become: root
+    ansible_python_interpreter: /usr/bin/python3
