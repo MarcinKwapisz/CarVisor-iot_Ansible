@@ -1,0 +1,10 @@
+[Unit]
+Description=Carvisor service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python /usr/src/carvisor/main.py
+
+[Install]
+WantedBy=multi-user.target

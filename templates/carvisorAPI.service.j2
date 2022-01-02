@@ -1,0 +1,10 @@
+[Unit]
+Description=Carvisor API service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python /usr/src/carvisor/APIMiddleware.py
+
+[Install]
+WantedBy=multi-user.target

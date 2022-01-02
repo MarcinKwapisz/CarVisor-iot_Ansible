@@ -1,34 +1,82 @@
---- Carvisor IoT playbook
-
-- name: BASIC INSTALL
-  with_items: groups['all']
-  become: yes
-  gather_facts: yes
+---
+- name: Carvisor install
+  hosts: all
+  remote_user: root
 
   tasks:
-    - name: Upgrade all apt packages
-       apt: upgrade=dist force_apt_get=yes
-    - name: Install essential
-      apt:
-        pkg:
-          - git
-          - setuptools
-          - python3
-          - python3-apt
-          - pyton3-pip
-          - python3-opencv
-        state: latest
-        update_cache: true
-    - name: Pip install essential
+    # - name: Update all packages to their latest version
+    #   apt:
+    #     name: "*"
+    #     state: latest
+    #   become: yes
+    #   become_method: sudo
+    # - name: Install essential
+    #   apt:
+    #     pkg:
+    #       - git
+    #       - python3
+    #       - python3-apt
+    #       - python3-pip
+    #       - vim
+    #       - libnfc6
+    #       - libnfc-bin
+    #       - libnfc-examples
+    #     state: latest
+    #     update_cache: true
+    #   become: yes
+    #   become_method: sudo
+    - name: Pip install flask
+      become: yes
+      become_user: root
       pip:
-        virtualenv_command: /usr/bin/python3 -m venv
-        name: flask numpy tinydb serial
-        state: latest
-    - name: Get Carvisor-IoT repo
-      git:
-          repo: git@github.com:MarcinKwapisz/carvisor-iotapp.git
-          dest: /src/carvisor
-          version: master
-          accept_hostkey: yes
-        become: yes
-        become_user: root
+        name:
+          - flask
+          - numpy
+          - tinydb
+          - serial
+        executable: pip3
+
+    - name: Create a directory if it does not exist
+      ansible.builtin.file:
+        path: /usr/src/carvisor
+        state: directory
+        mode: '0755'
+      become: yes
+      become_method: sudo
+    - name: Clone a repo with separate git directory
+      ansible.builtin.git:
+        repo: https://github.com/MarcinKwapisz/carvisor-iotapp.git
+        dest: /usr/src/carvisor
+        clone: yes
+      become: yes
+      become_method: sudo
+    - name: Copy Carvisor service file
+      ansible.builtin.copy:
+        src: templates/carvisor.service.j2
+        dest: /lib/systemd/system/carvisor.service
+        owner: root
+        mode: u+rwx,g-wx,o-rwx
+      become: yes
+      become_method: sudo
+    - name: Copy Carvisor API service file
+      ansible.builtin.copy:
+        src: templates/carvisorAPI.service.j2
+        dest: /lib/systemd/system/carvisorAPI.service
+        owner: root
+        mode: u+rwx,g-wx,o-rwx
+      become: yes
+      become_method: sudo
+    - name: Carvisor | Start Carvisor service
+      ansible.builtin.service:
+        name: carvisor.service
+        state: started
+        enabled: yes
+      become: yes
+      become_method: sudo
+    - name: Carvisor | Start Carvisor API service
+      ansible.builtin.service:
+        name: carvisorAPI.service
+        state: started
+        enabled: yes
+      become: yes
+      become_method: sudo
