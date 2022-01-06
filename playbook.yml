@@ -4,27 +4,27 @@
   remote_user: root
 
   tasks:
-    # - name: Update all packages to their latest version
-    #   apt:
-    #     name: "*"
-    #     state: latest
-    #   become: yes
-    #   become_method: sudo
-    # - name: Install essential
-    #   apt:
-    #     pkg:
-    #       - git
-    #       - python3
-    #       - python3-apt
-    #       - python3-pip
-    #       - vim
-    #       - libnfc6
-    #       - libnfc-bin
-    #       - libnfc-examples
-    #     state: latest
-    #     update_cache: true
-    #   become: yes
-    #   become_method: sudo
+    - name: Update all packages to their latest version
+      apt:
+        name: "*"
+        state: latest
+      become: yes
+      become_method: sudo
+    - name: Install essential
+      apt:
+        pkg:
+        - git
+        - python3
+        - python3-apt
+        - python3-pip
+        - vim
+        - libnfc6
+        - libnfc-bin
+        - libnfc-examples
+        state: latest
+        update_cache: true
+      become: yes
+      become_method: sudo
     - name: Pip install flask
       become: yes
       become_user: root
@@ -33,9 +33,8 @@
           - flask
           - numpy
           - tinydb
-          - serial
+          - pyserial
         executable: pip3
-
     - name: Create a directory if it does not exist
       ansible.builtin.file:
         path: /usr/src/carvisor
@@ -50,10 +49,28 @@
         clone: yes
       become: yes
       become_method: sudo
+    - name: Make Carvisor start file executable
+      ansible.builtin.file:
+        path: /usr/src/carvisor/start_carvisor.sh
+        state: touch
+        mode: u=rwx,g=r,o=r
+    - name: Make Carvisor BT file executable
+      ansible.builtin.file:
+        path: /usr/src/carvisor/BTStart.sh
+        state: touch
+        mode: u=rwx,g=r,o=r
     - name: Copy Carvisor service file
       ansible.builtin.copy:
         src: templates/carvisor.service.j2
         dest: /lib/systemd/system/carvisor.service
+        owner: root
+        mode: u+rwx,g-wx,o-rwx
+      become: yes
+      become_method: sudo
+    - name: Copy NFC config file
+      ansible.builtin.copy:
+        src: templates/libnfc.conf.j2
+        dest: /etc/nfc/libnfc.conf
         owner: root
         mode: u+rwx,g-wx,o-rwx
       become: yes
