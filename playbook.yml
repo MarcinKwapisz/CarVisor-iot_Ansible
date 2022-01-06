@@ -21,11 +21,12 @@
         - libnfc6
         - libnfc-bin
         - libnfc-examples
+        - bluez
         state: latest
         update_cache: true
       become: yes
       become_method: sudo
-    - name: Pip install flask
+    - name: Pip install packages
       become: yes
       become_user: root
       pip:
@@ -34,6 +35,9 @@
           - numpy
           - tinydb
           - pyserial
+          - pint
+          - pynmea2
+          - pybluez
         executable: pip3
     - name: Create a directory if it does not exist
       ansible.builtin.file:
@@ -54,11 +58,15 @@
         path: /usr/src/carvisor/start_carvisor.sh
         state: touch
         mode: u=rwx,g=r,o=r
+      become: yes
+      become_method: sudo
     - name: Make Carvisor BT file executable
       ansible.builtin.file:
         path: /usr/src/carvisor/BTStart.sh
         state: touch
         mode: u=rwx,g=r,o=r
+      become: yes
+      become_method: sudo
     - name: Copy Carvisor service file
       ansible.builtin.copy:
         src: templates/carvisor.service.j2
