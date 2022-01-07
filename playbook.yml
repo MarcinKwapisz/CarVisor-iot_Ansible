@@ -22,6 +22,8 @@
         - libnfc-bin
         - libnfc-examples
         - bluez
+        - bluetooth
+        - libbluetooth-dev
         state: latest
         update_cache: true
       become: yes
@@ -38,6 +40,7 @@
           - pint
           - pynmea2
           - pybluez
+          - nfcpy
         executable: pip3
     - name: Create a directory if it does not exist
       ansible.builtin.file:
@@ -105,3 +108,8 @@
         enabled: yes
       become: yes
       become_method: sudo
+    - name: Reboot device
+      reboot:
+      become: yes
+      become_method: sudo
+
