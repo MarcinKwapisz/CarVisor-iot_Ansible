@@ -108,6 +108,30 @@
         enabled: yes
       become: yes
       become_method: sudo
+    - name: Move config file in boot catolog
+      shell: "sudo mv /boot/config.txt /boot/config.txt.bck"
+      become: yes
+      become_method: sudo
+    - name: Write config file in boot catolog
+      shell: "sudo head -n -7 /boot/config.txt.bck >> /boot/config.txt"
+      become: yes
+      become_method: sudo
+    - name: Write to config file in boot catolog
+      shell: "sudo echo '[all]\ndtoverlay=uart2\ndtoverlay=uart3\ndtoverlay=uart4\ndtoverlay=uart5\n[pi4]\n# Run as fast as firmware / board allows\narm_boost=1\n\n[all]\nenable_uart=1' >> /boot/config.txt"
+      become: yes
+      become_method: sudo
+    - name: Remove bluetooth service file
+      shell: "sudo rm -f /usr/lib/systemd/system/bluetooth.service"
+      become: yes
+      become_method: sudo
+    - name: Add new bluetooth service file
+      ansible.builtin.copy:
+        src: templates/bluetooth.service.j2
+        dest: /lib/systemd/system/bluetooth.service
+        owner: root
+        mode: u+rwx,g-wx,o-rwx
+      become: yes
+      become_method: sudo
     - name: Reboot device
       reboot:
       become: yes
